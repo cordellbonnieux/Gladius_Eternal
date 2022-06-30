@@ -1,8 +1,23 @@
-let canvas;
-let context;
-let WIDTH, HEIGHT;
+// data members
+let canvas
+let context
+let WIDTH, HEIGHT
+let oldTimeStamp = 0
 
+// keep track of what sprites are ready
+let loaded = {
+    background: false
+}
+
+// background sprite
+let sprite_background = new Image()
+sprite_background.src = '../images/moro.jpg'
+sprite_background.onload = () => loaded.background = true
+
+
+// start game when window is loaded
 window.onload = init;
+
 
 function init(){
     // initialize canvas
@@ -13,17 +28,20 @@ function init(){
 }
 
 function gameLoop(timeStamp){
-    draw();
-
-    // Keep requesting new frames
-    window.requestAnimationFrame(gameLoop);
+    // draw and add elements
+    draw()
+    // end and loop
+    oldTimeStamp = timeStamp
+    window.requestAnimationFrame(gameLoop)
 }
 
 function draw(){
     getViewport()
-    let randomColor = Math.random() > 0.5? '#ff8080' : '#0099b0';
-    context.fillStyle = randomColor;
-    context.fillRect(0, 0, WIDTH, HEIGHT);
+    // draw BG
+    drawBG()
+    // draw ground / walls
+    // draw enemies
+    // draw character
 }
 
 function getViewport() {
@@ -31,4 +49,11 @@ function getViewport() {
     WIDTH = window.innerWidth
     canvas.style.height = HEIGHT + "px"
     canvas.style.width = WIDTH + "px"
+}
+
+function drawBG() {
+    if (loaded.background) {
+        context.drawImage(sprite_background, 0, 0)
+        console.log(sprite_background.src)
+    }
 }
