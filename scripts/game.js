@@ -20,7 +20,19 @@ sprite_background.onload = () => loaded.background = true
 let player = {
     x: 0,
     y: 0,
+    hp: 10,
+    speed: 8,
+    alive: true,
     facingRight: true,
+    reset: () => {
+        this.x = WIDTH / 2
+        this.y = WIDTH / 2
+    },
+    draw: () => {
+        //draw rect for now
+        context.fillStyle = 'red'
+        context.fillRect(player.x, player.y, 32, 32)
+    },
     sprite: null,
 }
 
@@ -51,20 +63,16 @@ function draw(){
     // draw ground / walls
     // draw enemies
     // draw character
-    drawPlayer()
+    player.draw()
 }
 
 function getViewport() {
     HEIGHT = window.innerHeight
     WIDTH = window.innerWidth
+    canvas.width = WIDTH
+    canvas.height = HEIGHT
     canvas.style.height = HEIGHT + "px"
     canvas.style.width = WIDTH + "px"
-}
-
-function drawPlayer() {
-    //draw rect for now
-    context.fillStyle = 'red'
-    context.fillRect(player.x, player.y, 32, 32)
 }
 
 function drawBG() {
@@ -73,6 +81,19 @@ function drawBG() {
     }
 }
 
-window.onkeydown = (e) => {
-    console.log(e.key) // that's the one!
+// desktop/key controls
+window.onkeydown = (e) => move(e)
+window.onkeyup = (e) => move(e)
+
+// movement
+function move(e) {
+    if (e.key === 'w' || e.key === 'ArrowUp') {
+        player.y -= player.speed
+    } else if (e.key === 'd' || e.key === 'ArrowRight') {
+        player.x += player.speed
+    } else if (e.key === 's' || e.key === 'ArrowDown') {
+        player.y += player.speed
+    } else if (e.key === 'a' || e.key === 'ArrowLeft') {
+        player.x -= player.speed
+    }
 }
