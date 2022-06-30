@@ -15,8 +15,7 @@ let sprite_background = new Image()
 sprite_background.src = '../images/moro.jpg'
 sprite_background.onload = () => loaded.background = true
 
-// player sprite
-// add later use rect for now
+// player 
 let player = {
     x: 0,
     y: 0,
@@ -25,8 +24,8 @@ let player = {
     alive: true,
     facingRight: true,
     reset: () => {
-        this.x = WIDTH / 2
-        this.y = WIDTH / 2
+        player.x = WIDTH / 2
+        player.y = WIDTH / 2
     },
     draw: () => {
         //draw rect for now
@@ -34,6 +33,20 @@ let player = {
         context.fillRect(player.x, player.y, 32, 32)
     },
     sprite: null,
+}
+
+// walls
+class Wall {
+    constructor(x, y, number) {
+        this.number = number
+        this.x = x
+        this.y = y
+    }
+    draw() {
+        //draw rect for now
+        context.fillStyle = 'blue'
+        context.fillRect(this.x, this.y, 32, 32)
+    }
 }
 
 // start game when window is loaded
@@ -61,6 +74,7 @@ function draw(){
     // draw BG
     drawBG()
     // draw ground / walls
+    new Wall(200, 200, 1).draw()
     // draw enemies
     // draw character
     player.draw()
@@ -88,12 +102,20 @@ window.onkeyup = (e) => move(e)
 // movement
 function move(e) {
     if (e.key === 'w' || e.key === 'ArrowUp') {
-        player.y -= player.speed
+        if (player.y > 0) {
+            player.y -= player.speed
+        }
     } else if (e.key === 'd' || e.key === 'ArrowRight') {
-        player.x += player.speed
+        if (player.x < WIDTH) {
+            player.x += player.speed
+        }
     } else if (e.key === 's' || e.key === 'ArrowDown') {
-        player.y += player.speed
+        if (player.y < HEIGHT) {
+            player.y += player.speed
+        }
     } else if (e.key === 'a' || e.key === 'ArrowLeft') {
-        player.x -= player.speed
+        if (player.x > 0) {
+            player.x -= player.speed
+        }
     }
 }
