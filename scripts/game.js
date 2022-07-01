@@ -3,6 +3,7 @@ let canvas
 let context
 let WIDTH, HEIGHT
 let oldTimeStamp = 0
+let collisionBox = 36
 
 // keep track of what sprites are ready
 let loaded = {
@@ -14,6 +15,9 @@ let loaded = {
 let sprite_background = new Image()
 sprite_background.src = '../images/moro.jpg'
 sprite_background.onload = () => loaded.background = true
+
+// walls
+let walls = []
 
 // player 
 let player = {
@@ -31,6 +35,41 @@ let player = {
         //draw rect for now
         context.fillStyle = 'red'
         context.fillRect(player.x, player.y, 32, 32)
+    },
+    checkCollision: () => {
+        for (let i = 0; i < walls.length; i++) {
+            let distance = 32
+            let collisions = {
+                x: false,
+                y: false
+            }
+            if (walls[i].x > player.x) {
+                collisions.x = (walls[i] - player.x) < distance ? true : false
+            } else if (player.x > walls[i].x) {
+                collisions.x = (player.x - walls[i].x) < distance ? true : false
+            }
+            if (walls[i].y > player.y) {
+                collisions.y = (walls[i].y - player.y) < distance ? true : false
+            } else if (player.y > walls[i].y) {
+                collisions.y = (player.y - walls[i].y) < distance ? true : false
+            }
+            if (collisions.x && collisions.y) {
+                return true
+            }
+        }
+    },
+    collisionRight: () => {
+        for (let i = 0; i < walls.length; i++) {
+            if (walls[i].x > player.x) {
+                if ((walls[i].x - player.x) < collisionBox) {
+                    let difference = walls[i].y > player.y ? walls[i].y - player.y : player.y - walls[i].y
+                    if (difference < collisionBox) {
+                        return true
+                    }
+                }
+            }
+            return false
+        }
     },
     sprite: null,
 }
@@ -74,7 +113,8 @@ function draw(){
     // draw BG
     drawBG()
     // draw ground / walls
-    new Wall(200, 200, 1).draw()
+    walls.push(new Wall(200, 200, 1))
+    walls.forEach(wall => wall.draw())
     // draw enemies
     // draw character
     player.draw()
@@ -105,7 +145,7 @@ function move(e) {
         if (player.y > 0) {
             player.y -= player.speed
         }
-    } else if (e.key === 'd' || e.key === 'ArrowRight') {
+    } else if ((e.key === 'd' || e.key === 'ArrowRight') && !player.collisionRight()) {
         if (player.x < WIDTH) {
             player.x += player.speed
         }
