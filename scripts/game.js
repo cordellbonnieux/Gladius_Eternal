@@ -1,9 +1,9 @@
 // data members
 let canvas
 let context
-let WIDTH, HEIGHT
+let WIDTH, HEIGHT, SPRITE = 32
 let oldTimeStamp = 0
-let collisionBox = 32.5
+let collisionBox = 33
 
 // keep track of what sprites are ready
 let loaded = {
@@ -68,21 +68,21 @@ let player = {
                     }
                 }
             }
-            return false
         }
+        return false
     },
     collisionLeft: () => {
         for (let i = 0; i < walls.length; i++) {
-            if (walls[i].x < player.x) {
-                if ((player.x - walls[i].x) < collisionBox) {
+            if (walls[i].x <= player.x) {
+                if ((player.x - walls[i].x) < collisionBox + 7) {
                     let difference = walls[i].y > player.y ? walls[i].y - player.y : player.y - walls[i].y
                     if (difference < collisionBox) {
                         return true
                     }
                 }
             }
-            return false
         }
+        return false
     },
     collisionBottom: () => {
         for (let i = 0; i < walls.length; i++) {
@@ -94,21 +94,21 @@ let player = {
                     }
                 }
             }
-            return false
         }
+        return false
     },
     collisionTop: () => {
         for (let i = 0; i < walls.length; i++) {
-            if (walls[i].y < player.y) {
-                if ((player.y - walls[i].y) < collisionBox) {
+            if (walls[i].y <= player.y) {
+                if ((player.y - walls[i].y) < collisionBox + 7) {
                     let difference = walls[i].x > player.x ? walls[i].x - player.x : player.x - walls[i].x
                     if (difference < collisionBox) {
                         return true
                     }
                 }
             }
-            return false
         }
+        return false
     },
     sprite: null,
 }
@@ -127,18 +127,39 @@ class Wall {
     }
 }
 
+function makeWalls() {
+    let arr = []
+    let topLeftX = WIDTH / 2 - 512
+    let topLeftY = HEIGHT / 2 - 256
+    for (let i = 0; i < 32; i++) {
+        arr.push(new Wall(topLeftX + (i * SPRITE), topLeftY, i))
+    }
+    for (let i = 0; i < 16; i++) {
+        arr.push(new Wall(topLeftX, topLeftY + (i * SPRITE), i))
+    }
+    return arr
+}
+
 // start game when window is loaded
 window.onload = init;
 
-
 function init(){
     // initialize canvas
-    canvas = document.getElementById('canvas');
-    context = canvas.getContext('2d');
+    canvas = document.getElementById('canvas')
+    context = canvas.getContext('2d')
+    // get viewport size
+    getViewport()
+    // make walls
+    walls = makeWalls()
+    // set player position
+    player.x = WIDTH / 2
+    player.y = HEIGHT / 2
     // start game loop
-    window.requestAnimationFrame(gameLoop);
+    window.requestAnimationFrame(gameLoop)
 }
-
+/*
+* MAIN GAME LOOP
+*/
 function gameLoop(timeStamp){
     // draw and add elements
     draw()
@@ -152,20 +173,16 @@ function draw(){
     // draw BG
     drawBG()
     // draw ground / walls
-    walls.push(new Wall(200, 200, 1))
-    walls.forEach(wall => wall.draw())
+    drawWalls()
     // draw enemies
     // draw character
     player.draw()
 }
 
-function getViewport() {
-    HEIGHT = window.innerHeight
-    WIDTH = window.innerWidth
-    canvas.width = WIDTH
-    canvas.height = HEIGHT
-    canvas.style.height = HEIGHT + "px"
-    canvas.style.width = WIDTH + "px"
+function drawWalls() {
+    for (let i = 0; i < walls.length; i++) {
+        walls[i].draw()
+    }
 }
 
 function drawBG() {
@@ -197,4 +214,13 @@ function move(e) {
             player.x -= player.speed
         }
     }
+}
+
+function getViewport() {
+    HEIGHT = window.innerHeight
+    WIDTH = window.innerWidth
+    canvas.width = WIDTH
+    canvas.height = HEIGHT
+    canvas.style.height = HEIGHT + "px"
+    canvas.style.width = WIDTH + "px"
 }
