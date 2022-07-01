@@ -3,7 +3,7 @@ let canvas
 let context
 let WIDTH, HEIGHT
 let oldTimeStamp = 0
-let collisionBox = 36
+let collisionBox = 32.5
 
 // keep track of what sprites are ready
 let loaded = {
@@ -24,7 +24,7 @@ let player = {
     x: 0,
     y: 0,
     hp: 10,
-    speed: 8,
+    speed: 14,
     alive: true,
     facingRight: true,
     reset: () => {
@@ -63,6 +63,45 @@ let player = {
             if (walls[i].x > player.x) {
                 if ((walls[i].x - player.x) < collisionBox) {
                     let difference = walls[i].y > player.y ? walls[i].y - player.y : player.y - walls[i].y
+                    if (difference < collisionBox) {
+                        return true
+                    }
+                }
+            }
+            return false
+        }
+    },
+    collisionLeft: () => {
+        for (let i = 0; i < walls.length; i++) {
+            if (walls[i].x < player.x) {
+                if ((player.x - walls[i].x) < collisionBox) {
+                    let difference = walls[i].y > player.y ? walls[i].y - player.y : player.y - walls[i].y
+                    if (difference < collisionBox) {
+                        return true
+                    }
+                }
+            }
+            return false
+        }
+    },
+    collisionBottom: () => {
+        for (let i = 0; i < walls.length; i++) {
+            if (walls[i].y > player.y) {
+                if ((walls[i].y - player.y) < collisionBox) {
+                    let difference = walls[i].x > player.x ? walls[i].x - player.x : player.x - walls[i].x
+                    if (difference < collisionBox) {
+                        return true
+                    }
+                }
+            }
+            return false
+        }
+    },
+    collisionTop: () => {
+        for (let i = 0; i < walls.length; i++) {
+            if (walls[i].y < player.y) {
+                if ((player.y - walls[i].y) < collisionBox) {
+                    let difference = walls[i].x > player.x ? walls[i].x - player.x : player.x - walls[i].x
                     if (difference < collisionBox) {
                         return true
                     }
@@ -141,7 +180,7 @@ window.onkeyup = (e) => move(e)
 
 // movement
 function move(e) {
-    if (e.key === 'w' || e.key === 'ArrowUp') {
+    if ((e.key === 'w' || e.key === 'ArrowUp') && !player.collisionTop()) {
         if (player.y > 0) {
             player.y -= player.speed
         }
@@ -149,11 +188,11 @@ function move(e) {
         if (player.x < WIDTH) {
             player.x += player.speed
         }
-    } else if (e.key === 's' || e.key === 'ArrowDown') {
+    } else if ((e.key === 's' || e.key === 'ArrowDown') && !player.collisionBottom()) {
         if (player.y < HEIGHT) {
             player.y += player.speed
         }
-    } else if (e.key === 'a' || e.key === 'ArrowLeft') {
+    } else if ((e.key === 'a' || e.key === 'ArrowLeft') && !player.collisionLeft()) {
         if (player.x > 0) {
             player.x -= player.speed
         }
