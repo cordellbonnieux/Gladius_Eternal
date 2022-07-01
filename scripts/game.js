@@ -148,15 +148,33 @@ class Enemy {
         this.move()
     }
     move() {
-        if (this.x > player.x) {
-            this.x -= this.speed
-        } else if (this.x < player.x) {
-            this.x += this.speed
+        // add some randomization
+        let rand = Math.floor(Math.random() * 3)
+        // avoid other enemies
+        for (let i = 0; i < enemies.length; i++) {
+            if (enemies[i] != this && enemies[i].number != this.number) {
+                if (enemies[i].x > this.x && enemies[i].x - this.x < SPRITE) {
+                    this.x -= this.speed * rand
+                } else if (this.x > enemies[i].x && this.x - enemies[i].x < SPRITE) {
+                    this.x += this.speed * rand
+                }
+                if (enemies[i].y > this.y && enemies[i].y - this.y < SPRITE) {
+                    this.y -= this.speed * rand
+                } else if (this.y > enemies[i].y && this.y - enemies[i].y < SPRITE) {
+                    this.y += this.speed * rand
+                }
+            }
         }
-        if (this.y > player.y) {
-            this.y -= this.speed
-        } else if (this.y < player.y) {
-            this.y += this.speed
+        // follow player
+        if (this.x > player.x && this.x - player.x > SPRITE) {
+            this.x -= this.speed * rand
+        } else if (this.x < player.x && player.x - this.x > SPRITE) {
+            this.x += this.speed * rand
+        }
+        if (this.y > player.y && this.y - player.y > SPRITE) {
+            this.y -= this.speed * rand
+        } else if (this.y < player.y && player.y - this.y > SPRITE) {
+            this.y += this.speed * rand
         }
     }
 }
