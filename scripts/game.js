@@ -5,7 +5,7 @@ let WIDTH, HEIGHT, SPRITE = 32
 const levelWidth = 512
 const levelHeight = 256
 let oldTimeStamp = 0
-let collisionBox = 33
+let collisionBox = 32
 
 // keep track of what sprites are ready
 let loaded = {
@@ -21,12 +21,16 @@ sprite_background.onload = () => loaded.background = true
 // walls
 let walls = []
 
+// enemies
+let enemies = []
+let enemyCounter = 0
+
 // player 
 let player = {
     x: 0,
     y: 0,
     hp: 8,
-    speed: 16,
+    speed: 4,
     alive: true,
     facingRight: true,
     reset: () => {
@@ -39,21 +43,21 @@ let player = {
         context.fillRect(player.x, player.y, 32, 32)
     },
     checkCollision: () => {
-        for (let i = 0; i < walls.length; i++) {
-            let distance = 32
+        for (let i = 0; i < enemies.length; i++) {
+            let distance = SPRITE
             let collisions = {
                 x: false,
                 y: false
             }
-            if (walls[i].x > player.x) {
-                collisions.x = (walls[i] - player.x) < distance ? true : false
-            } else if (player.x > walls[i].x) {
-                collisions.x = (player.x - walls[i].x) < distance ? true : false
+            if (enemies[i].x > player.x) {
+                collisions.x = (enemies[i] - player.x) < distance ? true : false
+            } else if (player.x > enemies[i].x) {
+                collisions.x = (player.x - enemies[i].x) < distance ? true : false
             }
-            if (walls[i].y > player.y) {
-                collisions.y = (walls[i].y - player.y) < distance ? true : false
-            } else if (player.y > walls[i].y) {
-                collisions.y = (player.y - walls[i].y) < distance ? true : false
+            if (enemies.y > player.y) {
+                collisions.y = (enemies.y - player.y) < distance ? true : false
+            } else if (player.y > enemies.y) {
+                collisions.y = (player.y - enemies.y) < distance ? true : false
             }
             if (collisions.x && collisions.y) {
                 return true
@@ -76,7 +80,7 @@ let player = {
     collisionLeft: () => {
         for (let i = 0; i < walls.length; i++) {
             if (walls[i].x <= player.x) {
-                if ((player.x - walls[i].x) < collisionBox + 7) {
+                if ((player.x - walls[i].x) < collisionBox) {
                     let difference = walls[i].y > player.y ? walls[i].y - player.y : player.y - walls[i].y
                     if (difference < collisionBox) {
                         return true
@@ -102,7 +106,7 @@ let player = {
     collisionTop: () => {
         for (let i = 0; i < walls.length; i++) {
             if (walls[i].y <= player.y) {
-                if ((player.y - walls[i].y) < collisionBox + 7) {
+                if ((player.y - walls[i].y) < collisionBox) {
                     let difference = walls[i].x > player.x ? walls[i].x - player.x : player.x - walls[i].x
                     if (difference < collisionBox) {
                         return true
@@ -129,6 +133,34 @@ class Wall {
     }
 }
 
+// enemies
+class Enemy {
+    constructor(x, y, number) {
+        this.x = x
+        this.y = y
+        this.number = number
+        this.speed = 0.25
+    }
+    draw() {
+        //draw rect for now
+        context.fillStyle = 'green'
+        context.fillRect(this.x, this.y, 32, 32)
+        this.move()
+    }
+    move() {
+        if (this.x > player.x) {
+            this.x -= this.speed
+        } else if (this.x < player.x) {
+            this.x += this.speed
+        }
+        if (this.y > player.y) {
+            this.y -= this.speed
+        } else if (this.y < player.y) {
+            this.y += this.speed
+        }
+    }
+}
+
 function makeWalls() {
     let arr = []
     let topLeftX = WIDTH / 2 - levelWidth
@@ -139,18 +171,45 @@ function makeWalls() {
     }
     // left wall
     for (let i = 0; i < 16; i++) {
-        arr.push(new Wall(topLeftX, topLeftY + (i * SPRITE), i))
+        arr.push(new Wall(topLeftX, topLeftY + (i * SPRITE), i+32))
     }
     // right wall
     for (let i = 0; i < 16; i++) {
-        arr.push(new Wall(WIDTH / 2 + levelWidth, topLeftY + (i * SPRITE), i))
+        arr.push(new Wall(WIDTH / 2 + levelWidth, topLeftY + (i * SPRITE), i+48))
     }
     // bottom wall
     for (let i = 0; i < 33; i++) {
-        arr.push(new Wall(topLeftX + (i * SPRITE), HEIGHT / 2 + levelHeight, i))
+        arr.push(new Wall(topLeftX + (i * SPRITE), HEIGHT / 2 + levelHeight, i+64))
     }
     return arr
 }
+
+function makeEnemies() {
+    if (enemies.length < 4) {
+        let num = Math.floor(Math.random() * 4)
+        let x, y 
+        switch(num) {
+            case 0: x = WIDTH / 2 - levelWidth + SPRITE
+                    y = HEIGHT / 2
+                    break
+            case 1: x = WIDTH / 2
+                    y = HEIGHT / 2 - levelHeight + SPRITE
+                    break
+            case 2: x = WIDTH / 2 + levelWidth - SPRITE
+                    y = HEIGHT / 2
+                    break
+            case 3: x = WIDTH / 2 
+                    y = HEIGHT / 2 + levelHeight - SPRITE
+                    break
+            default: console.error('makeEnemies error')
+        }
+        enemies.push(new Enemy(x, y, enemyCounter))
+        enemyCounter++
+        console.log(enemies)
+    }
+}
+
+
 
 // start game when window is loaded
 window.onload = init;
@@ -175,6 +234,8 @@ function init(){
 function gameLoop(timeStamp){
     // draw and add elements
     draw()
+    // continuously make enemies
+    makeEnemies()
     // end and loop
     oldTimeStamp = timeStamp
     window.requestAnimationFrame(gameLoop)
@@ -187,6 +248,7 @@ function draw(){
     // draw ground / walls
     drawWalls()
     // draw enemies
+    drawEnemies()
     // draw character
     player.draw()
 }
@@ -194,6 +256,12 @@ function draw(){
 function drawWalls() {
     for (let i = 0; i < walls.length; i++) {
         walls[i].draw()
+    }
+}
+
+function drawEnemies() {
+    for (let i = 0; i < enemies.length; i++) {
+        enemies[i].draw()
     }
 }
 
