@@ -2,6 +2,8 @@
 let canvas
 let context
 let WIDTH, HEIGHT, SPRITE = 32
+const levelWidth = 512
+const levelHeight = 256
 let oldTimeStamp = 0
 let collisionBox = 33
 
@@ -23,8 +25,8 @@ let walls = []
 let player = {
     x: 0,
     y: 0,
-    hp: 10,
-    speed: 14,
+    hp: 8,
+    speed: 16,
     alive: true,
     facingRight: true,
     reset: () => {
@@ -129,13 +131,23 @@ class Wall {
 
 function makeWalls() {
     let arr = []
-    let topLeftX = WIDTH / 2 - 512
-    let topLeftY = HEIGHT / 2 - 256
+    let topLeftX = WIDTH / 2 - levelWidth
+    let topLeftY = HEIGHT / 2 - levelHeight
+    // top wall
     for (let i = 0; i < 32; i++) {
         arr.push(new Wall(topLeftX + (i * SPRITE), topLeftY, i))
     }
+    // left wall
     for (let i = 0; i < 16; i++) {
         arr.push(new Wall(topLeftX, topLeftY + (i * SPRITE), i))
+    }
+    // right wall
+    for (let i = 0; i < 16; i++) {
+        arr.push(new Wall(WIDTH / 2 + levelWidth, topLeftY + (i * SPRITE), i))
+    }
+    // bottom wall
+    for (let i = 0; i < 33; i++) {
+        arr.push(new Wall(topLeftX + (i * SPRITE), HEIGHT / 2 + levelHeight, i))
     }
     return arr
 }
